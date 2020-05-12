@@ -333,4 +333,10 @@ def run(hps="teeny", port=29500, **kwargs):
         dist.barrier()
 
 if __name__ == '__main__':
-    fire.Fire(run)
+    try:
+        fire.Fire(run)
+    except:
+        import pdb, traceback, sys
+        extype, value, tb = sys.exc_info()
+        traceback.print_exc()
+        pdb.post_mortem(tb)
