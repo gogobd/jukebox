@@ -10,6 +10,7 @@ RUN apt-get update \
         unzip \
         screen \
         vim \
+        net-tools \
     && apt-get clean
 
 # Install python miniconda3 + requirements
@@ -42,13 +43,11 @@ RUN conda install mpi4py=3.0.3 && \
 RUN conda install av=7.0.01 -c conda-forge && \
     pip install ./tensorboardX
 
-# Optional: Apex for faster training with fused_adam
-# RUN conda install pytorch=1.1 torchvision=0.3 cudatoolkit=10.0 -c pytorch && \
-RUN conda install -c conda-forge nvidia-apex
+# # Optional: Apex for faster training with fused_adam
+# RUN conda install -c conda-forge nvidia-apex
 
 # Start container in notebook mode
-CMD \
-    /code-server-3.2.0-linux-x86_64/code-server --bind-addr 0.0.0.0:8080 /jukebox/
+CMD /code-server-3.2.0-linux-x86_64/code-server --bind-addr 0.0.0.0:8080 /jukebox/
 
 # docker build -t openai_jukebox .
-# docker run -e PASSWORD='yourpassword' -p 6006:6006 -p 8080:8080 --ipc=host --gpus all -it openai_jukebox
+# docker run -e PASSWORD='yourpassword' -v /host/directory/data:/data -p 6006:6006 -p 8080:8080 --ipc=host --gpus all -it openai_jukebox
