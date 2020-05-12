@@ -8,6 +8,14 @@ Code for "Jukebox: A Generative Model for Music"
 [Explorer](http://jukebox.openai.com/) 
 [Colab](https://colab.research.google.com/github/openai/jukebox/blob/master/jukebox/Interacting_with_Jukebox.ipynb)
 
+# Notes
+
+Add second remote
+```
+git remote set-url --add --push origin https://github.com/gogobd/jukebox.git
+git remote set-url --add --push origin https://git.precalc.org/georg/jukebox.git
+```
+
 # Install
 ``` 
 # Required: Sampling
