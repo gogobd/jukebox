@@ -21,11 +21,8 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.s
     && ./Miniconda3-latest-Linux-x86_64.sh -b -p "${MINICONDA_HOME}" \
     && rm Miniconda3-latest-Linux-x86_64.sh
 
-# Code server
-ENV SHELL /bin/bash
-RUN wget -q https://github.com/cdr/code-server/releases/download/3.2.0/code-server-3.2.0-linux-x86_64.tar.gz \
-    && tar -xzvf code-server-3.2.0-linux-x86_64.tar.gz && chmod +x code-server-3.2.0-linux-x86_64/code-server \
-    && rm code-server-3.2.0-linux-x86_64.tar.gz
+# JupyterLab
+RUN conda install -c conda-forge jupyterlab 
 
 # Project dependencies
 RUN apt-get install -y libsndfile1-dev
@@ -36,18 +33,15 @@ WORKDIR /jukebox
 # Required: Sampling
 RUN conda install mpi4py=3.0.3 && \
     conda install pytorch=1.4 torchvision=0.5 cudatoolkit=10.0 -c pytorch && \
+    conda install -c conda-forge tensorboardx av=7.0.01 && \
     pip install -Ur requirements.txt && \
     pip install -e .
-
-# Required: Training
-RUN conda install av=7.0.01 -c conda-forge && \
-    pip install ./tensorboardX
 
 # # Optional: Apex for faster training with fused_adam
 # RUN conda install -c conda-forge nvidia-apex
 
 # Start container in notebook mode
-CMD /code-server-3.2.0-linux-x86_64/code-server --bind-addr 0.0.0.0:8080 /jukebox/
+CMD jupyter lab --no-browser --ip 0.0.0.0 --port 8888 --allow-root
 
-# docker build -t openai_jukebox .
-# docker run -e PASSWORD='yourpassword' -v /host/directory/data:/data -p 6006:6006 -p 8080:8080 --ipc=host --gpus all -it openai_jukebox
+# docker build -t jukebox_nb .
+# docker run -v /host/directory/data:/data -p 8888:8888 --ipc=host --gpus all -it jukebox_nb
