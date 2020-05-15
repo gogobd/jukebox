@@ -41,7 +41,7 @@ RUN conda install mpi4py=3.0.3 && \
 # RUN conda install -c conda-forge nvidia-apex
 
 # Start container in notebook mode
-CMD jupyter lab --no-browser --ip 0.0.0.0 --port 8888 --allow-root
+CMD python -m http.server & jupyter lab --no-browser --ip 0.0.0.0 --port 8888 --allow-root
 
 # docker build -t jukebox_nb .
-# docker run -v /host/directory/data:/data -p 8888:8888 --ipc=host --gpus all -it jukebox_nb
+# docker run -v /host/directory/data:/data -p 8000:8000 -p 8888:8888 --ipc=host --gpus all -e SHELL=/bin/bash -it jukebox_nb
