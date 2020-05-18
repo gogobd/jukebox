@@ -22,7 +22,7 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.s
     && rm Miniconda3-latest-Linux-x86_64.sh
 
 # JupyterLab
-RUN conda install -c conda-forge jupyterlab 
+RUN conda install -c conda-forge jupyterlab nodejs
 
 # Project dependencies
 RUN apt-get install -y libsndfile1-dev
@@ -39,6 +39,9 @@ RUN conda install mpi4py=3.0.3 && \
 
 # # Optional: Apex for faster training with fused_adam
 # RUN conda install -c conda-forge nvidia-apex
+
+# # Optional: Tensorboard
+# RUN conda install -c conda-forge tensorboard
 
 # Start container in notebook mode
 CMD python -m http.server & jupyter lab --no-browser --ip 0.0.0.0 --port 8888 --allow-root
