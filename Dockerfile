@@ -1,4 +1,4 @@
-FROM nvidia/cuda:latest
+FROM nvidia/cuda
 
 # Install system dependencies
 RUN apt-get update \
@@ -21,30 +21,41 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.s
     && ./Miniconda3-latest-Linux-x86_64.sh -b -p "${MINICONDA_HOME}" \
     && rm Miniconda3-latest-Linux-x86_64.sh
 
-# JupyterLab
-RUN conda install -c conda-forge jupyterlab nodejs
+COPY . /app
+WORKDIR /app
 
-# Project dependencies
-RUN apt-get install -y libsndfile1-dev
+## Code server
+RUN mkdir -p ~/.local/lib ~/.local/bin
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.7.4/code-server-3.7.4-linux-amd64.tar.gz | tar -C ~/.local/lib -xz
+RUN mv ~/.local/lib/code-server-3.7.4-linux-amd64 ~/.local/lib/code-server-3.7.4
+RUN ln -s ~/.local/lib/code-server-3.7.4/bin/code-server ~/.local/bin/code-server
+RUN PATH="~/.local/bin:$PATH"
 
-COPY . /jukebox
-WORKDIR /jukebox
+# Fix broken python plugin # https://github.com/cdr/code-server/issues/2341
+RUN mkdir -p ~/.local/share/code-server/ && mkdir -p ~/.local/share/code-server/User && echo "{\"extensions.autoCheckUpdates\": false, \"extensions.autoUpdate\": false}" > ~/.local/share/code-server/User/settings.json 
+RUN wget https://github.com/microsoft/vscode-python/releases/download/2020.10.332292344/ms-python-release.vsix \
+ && ~/.local/bin/code-server --install-extension ./ms-python-release.vsix || true
+
+# Correct version for python
+RUN conda create -n app_python python=3.7
+SHELL ["conda", "run", "-n", "app_python", "/bin/bash", "-c"]
 
 # Required: Sampling
-RUN conda install mpi4py=3.0.3 && \
-    conda install pytorch=1.4 torchvision=0.5 cudatoolkit=10.0 -c pytorch && \
-    conda install -c conda-forge tensorboardx av=7.0.01 && \
-    pip install -Ur requirements.txt && \
-    pip install -e .
+RUN conda install mpi4py=3.0.3 pytorch=1.4 torchvision=0.5 cudatoolkit=10.0 -c pytorch
+RUN cd /app && pip install -r requirements.txt && pip install -e .
 
-# # Optional: Apex for faster training with fused_adam
-# RUN conda install -c conda-forge nvidia-apex
+# if this fails, try: pip install mpi4py==3.0.3
 
-# # Optional: Tensorboard
-# RUN conda install -c conda-forge tensorboard
+# Required: Training
+RUN conda install av=7.0.01 -c conda-forge 
+RUN pip install ./tensorboardX
+ 
+## Optional: Apex for faster training with fused_adam
+#RUN conda install pytorch=1.1 torchvision=0.3 cudatoolkit=10.0 -c pytorch
+#RUN pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./apex
 
-# Start container in notebook mode
-CMD python -m http.server & jupyter lab --no-browser --ip 0.0.0.0 --port 8888 --allow-root
+CMD ~/.local/bin/code-server --bind-addr 0.0.0.0:8080 /app
 
-# docker build -t jukebox_nb .
-# docker run -v /host/directory/data:/data -p 8000:8000 -p 8888:8888 --ipc=host --gpus all -e SHELL=/bin/bash -it jukebox_nb
+# docker build -t jukebox .
+# docker run -v /host/directory/data:/data -p 8080:8080 -p 5001:5000 --ipc=host --gpus all -e SHELL=/bin/bash -it jukebox
+
