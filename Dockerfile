@@ -26,9 +26,9 @@ WORKDIR /app
 
 ## Code server
 RUN mkdir -p ~/.local/lib ~/.local/bin
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.7.4/code-server-3.7.4-linux-amd64.tar.gz | tar -C ~/.local/lib -xz
-RUN mv ~/.local/lib/code-server-3.7.4-linux-amd64 ~/.local/lib/code-server-3.7.4
-RUN ln -s ~/.local/lib/code-server-3.7.4/bin/code-server ~/.local/bin/code-server
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.8.0/code-server-3.8.0-linux-amd64.tar.gz | tar -C ~/.local/lib -xz
+RUN mv ~/.local/lib/code-server-3.8.0-linux-amd64 ~/.local/lib/code-server-3.8.0
+RUN ln -s ~/.local/lib/code-server-3.8.0/bin/code-server ~/.local/bin/code-server
 RUN PATH="~/.local/bin:$PATH"
 
 # Fix broken python plugin # https://github.com/cdr/code-server/issues/2341
@@ -41,7 +41,7 @@ RUN conda create -n app_python python=3.7
 SHELL ["conda", "run", "-n", "app_python", "/bin/bash", "-c"]
 
 # Required: Sampling
-RUN conda install mpi4py=3.0.3 pytorch=1.4 torchvision=0.5 cudatoolkit=10.0 -c pytorch
+RUN conda install pysoundfile=0.10.3.post1 mpi4py=3.0.3 pytorch=1.4 torchvision=0.5 cudatoolkit=10.0 -c pytorch -c conda-forge
 RUN cd /app && pip install -r requirements.txt && pip install -e .
 
 # if this fails, try: pip install mpi4py==3.0.3
