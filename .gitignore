@@ -133,4 +133,5 @@ dmypy.json
 .pyre/
 
 sample_1b/*
+sample_1b_prompted/*
 *.vsix
