@@ -63,6 +63,8 @@ The hps are for a V100 GPU with 16 GB GPU memory. The `1b_lyrics`, `5b`, and `5b
 for `1b_lyrics` and 1 GB for `5b_lyrics` per sample. If you are having trouble with CUDA OOM issues, try `1b_lyrics` or 
 decrease `max_batch_size` in sample.py, and `--n_samples` in the script call.
 
+Gogo: $ python jukebox/sample.py --model=1b_lyrics --name=sample_1b --levels=3 --sample_length_in_seconds=20 --total_sample_length_in_seconds=180 --sr=44100 --n_samples=8 --hop_fraction=0.5,0.5,0.125
+
 On a V100, it takes about 3 hrs to fully sample 20 seconds of music. Since this is a long time, it is recommended to use `n_samples > 1` so you can generate as many samples as possible in parallel. The 1B lyrics and upsamplers can process 16 samples at a time, while 5B can fit only up to 3. Since the vast majority of time is spent on upsampling, we recommend using a multiple of 3 less than 16 like `--n_samples 15` for `5b_lyrics`. This will make the top-level generate samples in groups of three while upsampling is done in one pass.
 
 To continue sampling from already generated codes for a longer duration, you can run
@@ -92,6 +94,8 @@ python jukebox/sample.py --model=5b_lyrics --name=sample_5b_prompted --levels=3 
 --sample_length_in_seconds=20 --total_sample_length_in_seconds=180 --sr=44100 --n_samples=6 --hop_fraction=0.5,0.5,0.125
 ```
 This will load the four files, tile them to fill up to `n_samples` batch size, and prime the model with the first `prompt_length_in_seconds` seconds.
+
+Gogo: $ python jukebox/sample.py --model=1b_lyrics --name=sample_1b_prompted --levels=3 --mode=primed --audio_file=/data/datasets/Bulbul_wav/10_Daddy_Was_a_Girl_I_Liked.wav --prompt_length_in_seconds=12 --sample_length_in_seconds=20 --total_sample_length_in_seconds=180 --sr=44100 --n_samples=6 --hop_fraction=0.5,0.5,0.125
 
 # Training
 ## VQVAE
